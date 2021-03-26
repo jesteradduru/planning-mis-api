@@ -75,9 +75,11 @@ const handleListFile = (req, res) => {
         // Using the NPM module 'async'
         async.doWhilst(function (callback) {
         drive.files.list({
-            q: "'1pWM3FP1SWk-ibxvrKjX8Edv0_Gx3VDA2' in parents and trashed = false",
-            fields: 'nextPageToken, files(id, name)',
+            //q: `'${req.params.folderId}' in parents and trashed = false`,
+            q: `trashed = false`,
+            fields: 'nextPageToken, files(id, name, createdTime, parents, appProperties)',
             spaces: 'drive',
+            orderBy: "createdTime asc",
             pageToken: pageToken
         }, function (err, response) {
             if (err) {
@@ -85,10 +87,30 @@ const handleListFile = (req, res) => {
             console.error(err);
             callback(err)
             } else {
-                const files = response.data.files.map(file => {
-                    return { name: file.name, link: "https://docs.google.com/spreadsheets/d/"+file.id }
-                });
-                res.json(files).status(200);
+                let files = [];
+                if(req.params.user === "ADMIN"){
+                    const filterFiles = response.data.files.filter(file => file.name !== "TEMPLATE");
+                    files = filterFiles.map(file => {
+                        return { 
+                             name: file.name, 
+                             link: "https://docs.google.com/spreadsheets/d/"+file.id, 
+                             id: file.id, 
+                             createdTime: file.createdTime
+                         }
+                     })
+                }else{
+                    const filterFiles = response.data.files.filter(file => file.appProperties.createdBy === req.params.user);
+                    files = filterFiles.map(file => {
+                       return { 
+                            name: file.name, 
+                            link: "https://docs.google.com/spreadsheets/d/"+file.id, 
+                            id: file.id, 
+                            createdTime: file.createdTime
+                        }
+                    })
+                }
+               
+                res.status(200).json(files);
             
             pageToken = res.nextPageToken;
             callback();

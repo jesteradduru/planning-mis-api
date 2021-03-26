@@ -1,7 +1,6 @@
 const handleSubmitForm = (req, res) => {
     const streamifier = require('streamifier');
-  // streamifier.createReadStream(req.file.buffer).pipe(process.stdout);
-  // console.log(req.file.path)
+
     const fs = require('fs');
     const readline = require('readline');
     const {google} = require('googleapis');
@@ -75,9 +74,12 @@ const handleSubmitForm = (req, res) => {
           const drive = google.drive({version: 'v3', auth});
         const folderId = req.body.folderId
         var fileMetadata = {
-            'name': 'BP201-' + Date.now() ,
+            'name': `${req.body.formName}` ,
             'mimeType': 'application/vnd.google-apps.spreadsheet',
-            parents: [folderId]
+            parents: [folderId],
+            "appProperties": {
+              "createdBy": req.body.username
+            }
           };
 
           var media = {
@@ -95,8 +97,7 @@ const handleSubmitForm = (req, res) => {
               res.json("Send excel only").status(500);
               console.error(err);
             } else {
-              res.json("Success").status(200);
-              console.log('File Id:', file.id);
+              res.json(file.data.id).status(200);
             }
           });
         } catch (error) {
