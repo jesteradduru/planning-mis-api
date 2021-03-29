@@ -84,39 +84,45 @@ const generateReport = (req, res) => {
         const repCornRanges = [ "C3", "E3", "C5", "E5", "C6", "E6" ]
 
         sheets.spreadsheets.values.batchGet({
-        spreadsheetId: req.params.livestock,
-        ranges: livestockRanges,
+            spreadsheetId: req.params.livestock,
+            ranges: livestockRanges,
         }, (err, result) => {
-        if (err) {
-            // Handle error
-            console.log(err);
-        } else {
-            livestockRanges.forEach((v, i) => {
+            if (err) {
+                // Handle error
+                console.log(err);
+            } else {
+                const { valueRanges } =  result.data;
+                const rangeVal = valueRanges.map(value => {
+                    return value.values.flat()[0]
+                });
+
                 let values = [
-                    [ result.data.valueRanges[i].values.flat()[0] ]
+                    [ rangeVal[0],, rangeVal[1] ],
+                    [],
+                    [ rangeVal[2],, rangeVal[3] ],
+                    [ rangeVal[4],, rangeVal[5] ],
                 ];
                 const resource = {values};
 
                 sheets.spreadsheets.values.update({
                     spreadsheetId: "1CsTYuWjhOB2vgbSnhOXeApaGSD1HwqSwpJ4ZLf4HKX4",
-                    range: repLivestockRanges[i],
+                    range: "C10",
                     valueInputOption: "USER_ENTERED",
                     resource,
                 }, (err, result) => {
-                if (err) {
-                    // Handle error
-                    console.log(err);
-                } else {
-                    // console.log('%d cells updated.', result.updatedCells);
-                }
+
+                    if (err) {
+                        // Handle error
+                        console.log(err);
+                    } else {
+                        // console.log('%d cells updated.', result.updatedCells);
+                    }
                 
                 }); //SHEET UPDATE
 
-            });//loop
-            
-
-        }
-        })
+            }
+        
+        });//batch get
 
         sheets.spreadsheets.values.batchGet({
             spreadsheetId: req.params.corn,
@@ -126,32 +132,37 @@ const generateReport = (req, res) => {
               // Handle error
               console.log(err);
             } else {
-                cornRanges.forEach((v, i) => {
-                    let values = [
-                        [ result.data.valueRanges[i].values.flat()[0] ]
-                    ];
-                    const resource = {values};
+                const { valueRanges } =  result.data;
 
-                    sheets.spreadsheets.values.update({
-                        spreadsheetId: "1CsTYuWjhOB2vgbSnhOXeApaGSD1HwqSwpJ4ZLf4HKX4",
-                        range: repCornRanges[i],
-                        valueInputOption: "USER_ENTERED",
-                        resource,
-                    }, (err, result) => {
-                    if (err) {
-                        // Handle error
-                        console.log(err);
-                    } else {
-                        // console.log('%d cells updated.', result.updatedCells);
-                    }
-                    
-                    }); //SHEET UPDATE
+                const rangeVal = valueRanges.map(value => {
+                    return value.values.flat()[0]
+                });
 
-                });//loop
+                let values = [
+                    [ rangeVal[0],,rangeVal[1] ],
+                    [],
+                    [ rangeVal[2],,rangeVal[3] ],
+                    [ rangeVal[4],,rangeVal[5] ],
+                ];
+                const resource = {values};
+
+                sheets.spreadsheets.values.update({
+                    spreadsheetId: "1CsTYuWjhOB2vgbSnhOXeApaGSD1HwqSwpJ4ZLf4HKX4",
+                    range: "C3",
+                    valueInputOption: "USER_ENTERED",
+                    resource,
+                }, (err, result) => {
+                if (err) {
+                    // Handle error
+                    console.log(err);
+                } else {
+                    // console.log('%d cells updated.', result.updatedCells);
+                    res.status(200).json("1CsTYuWjhOB2vgbSnhOXeApaGSD1HwqSwpJ4ZLf4HKX4")
+                }
+                }); //SHEET UPDATE
+
             }
-        })
-
-        setTimeout(() => res.status(200).json("1CsTYuWjhOB2vgbSnhOXeApaGSD1HwqSwpJ4ZLf4HKX4"), 5000)
+        }); //batch get
         
     }
     

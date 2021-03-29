@@ -1,8 +1,8 @@
 
 const users = [
-    { username: "corn", password: "corn" },
-    { username: "livestock", password: "livestock" },
-    { username: "admin", password: "admin" },
+    { username: "corn", password: "password" },
+    { username: "livestock", password: "password" },
+    { username: "admin", password: "password" },
   ]  
   
   const handleSignIn = (req, res) => {
