@@ -31,7 +31,7 @@ app.post("/submitForm", upload.single("excel"), (req, res) => {
   submitForm.handleSubmitForm(req, res);
 }); 
 
-app.get("/generateReport/:corn/:livestock", upload.single("excel"), (req, res) => {
+app.post("/generateReport", upload.single("excel"), (req, res) => {
   report.handleGenerateReport(req, res);
 }); 
 
